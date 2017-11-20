@@ -14,7 +14,7 @@ function aGrid = apertureGrid(obj,varargin)
 
 %%
 p = inputParser;
-p.addRequired('obj',@(x)(isa(obj,'lensC')));
+p.addRequired('obj',@(x)(isa(obj,'lens')));
 p.addParameter('randJitter',false,@islogical);
 vFunc = @(x)(isempty(x) || isvector(x));
 p.addParameter('subSection',[],vFunc);

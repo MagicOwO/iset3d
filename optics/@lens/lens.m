@@ -1,7 +1,7 @@
-classdef lensC <  handle
+classdef lens <  handle
     % Create a multiple element lens object
     %
-    %   lens = lensC(elOffset, elRadius, elAperture, elN, aperture, focalLength, center);
+    %   lens = lens(elOffset, elRadius, elAperture, elN, aperture, focalLength, center);
     %
     % Distance units, when not otherwise specified, are millimeters.
     %
@@ -41,7 +41,7 @@ classdef lensC <  handle
     % Example:
     %  Create a lens object
     %
-    %   lens = lensC();
+    %   thislens = lens();
     %
     %
     % AL Vistasoft Copyright 2014
@@ -72,7 +72,7 @@ classdef lensC <  handle
     methods (Access = public)
         
         %Multiple element lens constructor
-        function obj = lensC(varargin)
+        function obj = lens(varargin)
             
             % Initialize with the default lens file
             lensFileName = '2ElLens.dat';
@@ -101,7 +101,7 @@ classdef lensC <  handle
                         %                         % d for Diameter
                         %                         % Let's git rid of this and only have an aperture
                         %                         % diameter for the surface elements.  Then we must
-                        %                         % make sure that the lensC.draw routine uses that
+                        %                         % make sure that the lens.draw routine uses that
                         %                         % aperture. (BW,AJ)
                         %                         obj.apertureMiddleD = varargin{ii+1};
                     case 'apertureindex'

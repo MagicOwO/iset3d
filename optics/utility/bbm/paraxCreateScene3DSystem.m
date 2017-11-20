@@ -44,8 +44,8 @@ end
 
 %CREATE LENS SYSTEM
 
-lens=lensC('surfaceArray',surfaceArray,'focalLength',median(ImagSyst.cardPoints.fi),'wave',wave,'apertureSample',[100,100]);
-% lens=lensC('surfaceArray',surfaceArray,'focalLength',median(ImagSyst.cardinalPoint.fi),'wave',wave,'apertureSample',[nS_X,nS_Y]);
+lens=lens('surfaceArray',surfaceArray,'focalLength',median(ImagSyst.cardPoints.fi),'wave',wave,'apertureSample',[100,100]);
+% lens=lens('surfaceArray',surfaceArray,'focalLength',median(ImagSyst.cardinalPoint.fi),'wave',wave,'apertureSample',[nS_X,nS_Y]);
 
 % SET APERTURE DIAMETER
 lens.apertureMiddleD=Aper_Diam; %desidered diaphragm diameter

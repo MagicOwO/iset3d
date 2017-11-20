@@ -15,11 +15,11 @@ function apertureIndex(obj,index)
 %   index: specify the number of the surface which works as 'diaphrgam'
 %   
 %Example:
-%     lens = lensC; 
-%     lens.set('aperture index',2);
-%     lens.get('surface array',2)
+%     thisLens = lens; 
+%     thisLens.set('aperture index',2);
+%     thisLens.get('surface array',2)
 %
-% See also:  lensC, surfaceC
+% See also:  lens, surfaceC
 %
 % MP Vistasoft Team, Copyright 2014
 

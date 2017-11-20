@@ -3,7 +3,7 @@ function obj = rtThroughLens(obj, rays, nLines)
 %
 %  lens.rtThroughLens(rays,nLines)
 %
-% obj:    lensC class
+% obj:    lens class
 % ray:    rayC  class
 % nLines: Specifies rendering options
 %     This can be a structure with the fields

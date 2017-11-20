@@ -16,12 +16,12 @@ function [OptSyst] = paraxAnalyze(lens)
 
 %% TODO
 %
-% Put paraxAnalyze into the @lensC directory as a function called
+% Put paraxAnalyze into the @lens directory as a function called
 % bbmCreate.  And then the syntax will be
 %
 %   lens.bbmCreate
 %  
-%   Inside of the @lensC directory the function bbmCreate(obj) does what is
+%   Inside of the @lens directory the function bbmCreate(obj) does what is
 %   in paraxAnalyze.
 %   
 %  

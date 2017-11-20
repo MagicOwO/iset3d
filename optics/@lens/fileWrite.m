@@ -44,7 +44,7 @@ function fileWrite(obj, fullFileName, description)
 % The third row up has a center to the right, so the shape is a 'C'.  The
 % material is still glass. %
 %
-% In the lensC class, we don't use offsets. Instead, we store the sphere
+% In the lens class, we don't use offsets. Instead, we store the sphere
 % centers (sCenters) and radii (units of mm).  So here we go through the
 % surfaceArray and produce the radius and offset needed for the PBRT matrix
 % from the surfaceArray object sCenters and radius.
@@ -156,7 +156,7 @@ end
 
 %% Convert the surface array data to the PBRT matrix we want to write
 function d = lensMatrix(lens)
-% In the lensC class, we don't use offsets. Instead, we store the sphere
+% In the lens class, we don't use offsets. Instead, we store the sphere
 % centers (sCenters) and radii (units of mm).  So here we go through the
 % surfaceArray and produce the radius and offset needed for the PBRT matrix
 % from the surfaceArray object sCenters and radius.

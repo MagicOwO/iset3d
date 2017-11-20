@@ -12,8 +12,8 @@ function rays = rtSourceToEntrance(obj, pointSource, jitterFlag, rtType, subSect
 % wavelength differences.
 %
 % Inputs:
-%  obj:  A lensC object
-%  pointSource    -  a 3 vector
+%  obj:          A lens object
+%  pointSource   A 3 vector
 %  jitterFlag:   Jitter the ray positions?
 %  rtType:       Ray trace type
 %  subSection:   To speed things up ... more comment!

@@ -4,7 +4,7 @@ classdef surfaceC <  handle
     %   lens = surfaceC(parameter, value, ....);
     %
     % Presently we only represent spherical surfaces and apertures.  Multi
-    % element lenses (lensC) consist of a set of these surfaces and
+    % element lenses (lens) consist of a set of these surfaces and
     % apertures.
     %
     % This object is meant to be a class within the multi-element lens
