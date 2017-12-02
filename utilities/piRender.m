@@ -12,6 +12,7 @@ function [ieObject, result] = piRender(thisR,varargin)
 %  renderType - render radiance, depth or both (default).  If the input is
 %               a fullpath to a file, then we only render the radiance
 %               data. Ask if you want this changed to permit a depth map.
+%  vesion - which version of PBRT to render with 
 %
 % RETURN
 %   ieObject - an ISET scene. oi, or a depth map image
@@ -67,10 +68,13 @@ for ii=1:2:length(varargin)
 end
 
 rTypes = {'radiance','depth','both'};
-p.addParameter('rendertype','both',@(x)(contains(x,rTypes))); 
+p.addParameter('rendertype','both'); 
+
+p.addParameter('version',2,@(x)isnumeric(x));
 
 p.parse(thisR,varargin{:});
 renderType = p.Results.rendertype;
+version = p.Results.version;
 
 if ischar(thisR)
     % In this case, we are just rendering a pbrt file.  No depthFile.
@@ -149,7 +153,12 @@ for ii = 1:length(filesToRender)
     
     %% Build the docker command
     dockerCommand   = 'docker run -ti --rm';
-    dockerImageName = 'vistalab/pbrt-v2-spectral';
+    
+    if(thisR.version == 3 || version == 3)
+        dockerImageName = 'vistalab/pbrt-v3-spectral';
+    else
+        dockerImageName = 'vistalab/pbrt-v2-spectral';
+    end
     
     [~,currName,~] = fileparts(currFile);
     

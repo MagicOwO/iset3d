@@ -36,7 +36,7 @@ function [imageData, imageSize, lens] = piReadDAT(filename, varargin)
 %%
 parser = inputParser();
 parser.addRequired('filename', @ischar);
-parser.addParameter('maxPlanes', [], @isnumeric);
+parser.addParameter('maxPlanes', 31, @isnumeric);
 
 parser.parse(filename, varargin{:});
 filename = parser.Results.filename;
@@ -79,7 +79,7 @@ if count == 3
     lens.fieldOfView = lensData(3);
     fprintf('  Found lens data focalLength=%d, fStop=%d, fieldOfView=%d.\n', ...
         lens.focalLength, lens.fStop, lens.fieldOfView);
-elseif contains(headerLine,'v3')
+elseif (~isempty(strfind(headerLine,'v3')))
         % If in the header line we get a 'v3' flag, we know its a version 3
         % output file. 
         dataPosition = ftell(fid);
