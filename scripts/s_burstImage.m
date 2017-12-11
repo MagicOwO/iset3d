@@ -24,9 +24,14 @@ fname = fullfile(piRootPath,'data','ChessSet','chessSet.pbrt');
 workDir = fullfile(piRootPath,'local','chess');
 %}
 
-%
+%{
  fname = fullfile(piRootPath,'data','teapot-area','teapot-area-light.pbrt');
  workDir = fullfile(piRootPath,'local','teapot');
+%}
+
+%
+fname = fullfile(piRootPath,'data','sanmiguel','sanmiguel.pbrt');
+workDir = fullfile(piRootPath,'local','sanmiguel');
 %}
 
 if ~exist(fname,'file'), error('File not found'); end
@@ -40,10 +45,11 @@ from = thisR.get('from');
 %% Set up Docker 
 
 % For teapot
-%
+%{
 thisR.set('film resolution',256);
 thisR.set('rays per pixel',128);
 FOV = thisR.get('fov');
+from = thisR.get('from');
 %}
 
 % Chess set
@@ -56,6 +62,13 @@ FOV = thisR.get('fov');
  % First left/right, 2nd moved camera closer and to the right
  % I like this view.
  thisR.set('from',from);   
+%}
+
+% For sanmiguel scene
+%
+thisR.set('film resolution',256);
+thisR.set('rays per pixel',128);
+FOV = thisR.get('fov');
 %}
 
 
