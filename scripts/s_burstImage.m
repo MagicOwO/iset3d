@@ -19,12 +19,12 @@ if ~piDockerExists, piDockerConfig; end
 
 % We organize the pbrt files with its includes (textures, brdfs, spds, geometry)
 % in a single directory. 
-%
+%{
 fname = fullfile(piRootPath,'data','ChessSet','chessSet.pbrt');
 workDir = fullfile(piRootPath,'local','chess');
 %}
 
-%{
+%
  fname = fullfile(piRootPath,'data','teapot-area','teapot-area-light.pbrt');
  workDir = fullfile(piRootPath,'local','teapot');
 %}
@@ -40,14 +40,14 @@ from = thisR.get('from');
 %% Set up Docker 
 
 % For teapot
-%{
-thisR.get('rays per pixel')
-thisR.set('rays per pixel',64);
+%
+thisR.set('film resolution',256);
+thisR.set('rays per pixel',128);
 FOV = thisR.get('fov');
 %}
 
 % Chess set
-%
+%{
  thisR.set('camera','pinhole');
  thisR.set('film resolution',256);
  thisR.set('rays per pixel',128);
@@ -59,7 +59,7 @@ FOV = thisR.get('fov');
 %}
 
 
-%%
+%% Set up the burst parameters
 
 nShots = 8;
 eTime  = 0.004;
@@ -120,11 +120,14 @@ for ii=1:nShots
     else,       voltSum = voltSum + volts;
     end
     
-    outputName = sprintf('%s-%d%s',basename,ii,'.png');
+    outputName = sprintf('%s-%d%s',basename,ii,'.mat');
     vImage = fullfile(workDir,'renderings',outputName);
 
-    % Write out png scaled to 0 to 255, re: voltage swing
-    imwrite((volts/vSwing),vImage,'png');
+    % Write out 12 bit data.  They are scaled with respect to voltage
+    % swing.
+    dv = round(2^12*(volts/vSwing));
+    save(vImage, 'dv');
+    % load(vImage,'dv'); vcNewGraphWin; imagesc(dv); colormap(gray); truesize
 end
 
 %% Create a matched light field sensor
@@ -134,8 +137,6 @@ sensorBurst = sensorSet(sensor,'volts',voltSum);
 sensorBurst = sensorSet(sensorBurst,'name','burst');
 vcAddObject(sensorBurst); sensorWindow;
 sensorSet(sensorBurst,'gamma',0.5);
-
-
 
 %%  Now a single shot from a still recording with the same total time.
 
@@ -152,11 +153,16 @@ sensor = sensorSet(sensor,'name','still');
 vcAddObject(sensor); sensorWindow;
 sensorSet(sensor,'gamma',0.5);
 
-%%
-rgb = sensorShowImage(sensor,0.5,1);
-vcNewGraphWin;imagescRGB(rgb); title('Still');
+%% Have a look at the two types of images
 
-rgb = sensorShowImage(sensorBurst,0.5,1);
-vcNewGraphWin;imagescRGB(rgb); title('Burst');
+% One still photograph
+vcNewGraphWin; 
+rgbStill = sensorShowImage(sensor,0.5,1);
+imagescRGB(rgbStill); title('Still'); truesize
+
+% The sum of the separate burst images.  These need to be aligned.
+vcNewGraphWin; 
+rgbBurst = sensorShowImage(sensorBurst,0.5,1);
+imagescRGB(rgbBurst); title('Burst'); truesize
 
 %%
