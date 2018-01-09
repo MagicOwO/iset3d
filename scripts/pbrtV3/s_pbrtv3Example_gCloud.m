@@ -1,12 +1,23 @@
 %% Test a pbrtv3 scene.
-% 
+% Render using the gCloud class
+%
 % TL SCIEN 2017
 
 %% Initialize ISET and Docker
 
-% Check: Does the pbrt-v3-spectral docker container pull automatically?
 ieInit;
 if ~piDockerExists, piDockerConfig; end
+
+% Initialize gCloud
+gCloud = gCloud('dockerImage','gcr.io/primal-surfer-140120/pbrt-v3-spectral-gcloud',...
+                'cloudBucket','gs://primal-surfer-140120.appspot.com');
+gCloud.init();
+
+% Setup a working directory
+workDir = fullfile(piRootPath,'local','pbrtV3gCloud');
+if(~exist(workDir,'dir'))
+    mkdir(workDir);
+end
 
 %% Read the file
 
@@ -50,18 +61,27 @@ recipe.film.diagonal.type = 'float';
 
 %% Change render quality
 % This quality takes around 30 seconds to render on a machine with 8 cores.
-recipe.set('filmresolution',[128 128]);
-recipe.set('pixelsamples',128);
-recipe.integrator.maxdepth.value = 1;
+recipe.set('filmresolution',[256 256]);
+recipe.set('pixelsamples',256);
+recipe.integrator.maxdepth.value = 4;
 
 %% Render
 
 oiName = 'livingRoomWideAngle';
-recipe.set('outputFile',fullfile(piRootPath,'local',strcat(oiName,'.pbrt')));
+recipe.set('outputFile',fullfile(workDir,strcat(oiName,'.pbrt')));
 
 piWrite(recipe);
-[oi, result] = piRender(recipe);
+gCloud.upload(recipe);
+gCloud.render();
 
+% Pause for user input (wait until gCloud job is done)
+x = 'N';
+while(~strcmp(x,'Y'))
+    x = input('Did the gCloud render finish yet? (Y/N)','s');
+end
+
+objects = gCloud.download();
+oi = objects{1};
 vcAddObject(oi);
 oiWindow;
 
