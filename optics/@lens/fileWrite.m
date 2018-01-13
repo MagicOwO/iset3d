@@ -52,7 +52,7 @@ function fileWrite(obj, fullFileName, description)
 % AL VISTASOFT, Copyright 2014
 
 %%
-if ieNotDefined('description'), description = obj.type; end
+if notDefined('description'), description = obj.type; end
 
 % Open the lens file for writing
 % fid = fopen(fullfile(dataPath, 'rayTrace', 'dgauss.50mm.dat'));

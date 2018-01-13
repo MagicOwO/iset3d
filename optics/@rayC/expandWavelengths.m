@@ -16,7 +16,7 @@ function obj = expandWavelengths(obj, wave, waveIndex)
 % AL, Vistasoft Team, 2015
 
 % If not defined, then replicate for all the wavelengths
-if ieNotDefined('waveIndex'), waveIndex = 1:length(wave); end
+if notDefined('waveIndex'), waveIndex = 1:length(wave); end
 
 % This is the number of rays in the bundle.
 % subLength = size(obj.origin, 1);

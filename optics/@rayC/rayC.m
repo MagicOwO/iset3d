@@ -221,7 +221,7 @@ classdef rayC <  clonableHandleObject
                                 case 'waveindex'
                                     wantedWaveIndex = varargin{ii+1};
                                     wantedWave = obj.get('waveIndex');
-                                    if(~ieNotDefined('survivedFlag') && survivedFlag) %handles case if survivedrays called first
+                                    if(~notDefined('survivedFlag') && survivedFlag) %handles case if survivedrays called first
                                         wantedWave = wantedWave(survivedRays);
                                     end
                                     wantedWave = (wantedWave == wantedWaveIndex);
@@ -259,7 +259,7 @@ classdef rayC <  clonableHandleObject
                                 case 'waveindex'
                                     wantedWaveIndex = varargin{ii+1};
                                     wantedWave = obj.get('waveIndex');
-                                    if(~ieNotDefined('survivedFlag') && survivedFlag) %handles case if survivedrays called first
+                                    if(~notDefined('survivedFlag') && survivedFlag) %handles case if survivedrays called first
                                         wantedWave = wantedWave(survivedRays);
                                     end
                                     wantedWave = (wantedWave == wantedWaveIndex);

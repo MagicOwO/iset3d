@@ -14,7 +14,7 @@ function obj =  draw(obj, fHdl)
 
 %% Create the figure and set the parameters
 
-if ieNotDefined('figureHandle'), fHdl = vcNewGraphWin; axis equal;
+if notDefined('figureHandle'), fHdl = vcNewGraphWin; axis equal;
 else                             figure(fHdl);
 end
 obj.fHdl = fHdl;
