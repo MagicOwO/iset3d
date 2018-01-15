@@ -59,7 +59,7 @@ piWrite(thisR);
 % Show it in ISET
 vcAddObject(oi); oiWindow; oiSet(oi,'gamma',0.5);   
 
-%% Create a sensor 
+%% Create a sensor - Below here for ISET only (not ISETBIO)
 
 % Make a sensor so that each pixel is aligned with a single sample
 % in the OI.  Then produce the sensor data.  The sensor has a standard

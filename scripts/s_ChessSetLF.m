@@ -10,7 +10,7 @@
 %   1063 s       192            128
 %
 % The ChessSet scene data are fairly large, so we do not include it in the
-% github repository.  To download it, use the piFetchPBRT command below.
+% github repository.  To download it, use the piPBRTFetch command below.
 %
 % Downloading requires that you have the RemoteDataToolbox installed.
 % <https://github.com/isetbio/RemoteDataToolbox.git>.
