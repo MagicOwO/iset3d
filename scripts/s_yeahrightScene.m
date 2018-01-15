@@ -1,6 +1,6 @@
-%% Render a blank white scene for calibration purposes
+%% Render the yeahright scene
 %
-% TL SCIEN 2017
+% BW SCIEN 2018
 
 %% Initialize ISET and Docker
 
@@ -17,22 +17,10 @@ fname = '/home/wandell/pbrt-v2-spectral/pbrtScenes/yeahright/yeahright.pbrt';
 % Read the main scene pbrt file.  Return it as a recipe
 thisR = piRead(fname);
 
-%% Add a camera
-thisR = recipeSet(thisR,'camera','realistic');
-thisR.camera.specfile.value = fullfile(piRootPath,'data','lens','dgauss.22deg.50.0mm.dat');
-thisR.camera.filmdistance.value = 50;
-thisR.camera.aperture_diameter.value = 8;
-
-% Make the sensor really big so we can see the edge of the lens and the
-% vignetting.
-% This takes roughly a 90 seconds to render on a 6 core machine.
-% Why does this take so long? There seems to be a lot of NaN returns for
-% the radiance, maybe tracing the edges of the lens is difficult in some
-% way? The weighting of the rays might also be incorrect in PBRTv2. 
-thisR.camera.filmdiag.value = 100;
-
-thisR = recipeSet(thisR,'pixelsamples',256);
-thisR = recipeSet(thisR,'filmresolution',128);
+%% Set to pinhole camera for a scene
+thisR = recipeSet(thisR,'camera','pinhole');
+thisR = recipeSet(thisR,'pixel samples',  256);
+thisR = recipeSet(thisR,'film resolution',800);
 
 %% Write out a new pbrt file
 
@@ -52,7 +40,9 @@ piWrite(thisR, 'overwrite pbrt file', true,'overwrite resources',false);
 
 %% Render with the Docker container
 
-oi = piRender(thisR);
+scene = piRender(thisR);
 
 % Show it in ISET
-vcAddObject(oi); oiWindow;   
+vcAddObject(scene); sceneWindow;   
+
+%%
