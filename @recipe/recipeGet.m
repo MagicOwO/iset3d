@@ -1,10 +1,8 @@
-function val = recipeGet(thisR,param,varargin)
+function val = recipeGet(thisR, param, varargin)
 % Derive parameters from the recipe class
 %
-%     recipe.get(param,...)
-%
 % Syntax:
-%     val = recipeGet(thisR,param,varargin)
+%     val = recipeGet(thisR, param, ...)
 %
 % Inputs:
 %     thisR - a recipe object
@@ -16,8 +14,10 @@ function val = recipeGet(thisR,param,varargin)
 % Parameters
 %
 %   % Data management
-%     'input file'  - original scene pbrt file
-%     'output file' - scene pbrt file in working directory
+%     'input file'      - full path to original scene pbrt file
+%     'input base name' - just base name of input file
+%     'output file'     - full path to scene pbrt file in working directory
+%     'output base name' - just the base name of the output file
 %     'working directory' - directory mounted by docker image
 %
 %   % Camera and scene
@@ -77,6 +77,12 @@ switch ieParamFormat(param)
         % the piRender command to run.
         outputFile = thisR.get('output file');
         val = fileparts(outputFile);
+    case {'inputbasename'}
+        name = thisR.inputFile;
+        [~,val] = fileparts(name);
+    case {'outputbasename'}
+        name = thisR.outputFile;
+        [~,val] = fileparts(name);
         
         % Scene and camera relationship
     case 'objectdistance'
@@ -105,6 +111,7 @@ switch ieParamFormat(param)
         % yet.
         val = thisR.camera.subtype;
         if isequal(val,'perspective'), val = 'pinhole';
+        elseif isequal(val,'environment'), val = 'environment';
         elseif ismember(val,{'realisticDiffraction','realisticEye','realistic'})
             val = 'lens';
         end
@@ -113,6 +120,9 @@ switch ieParamFormat(param)
         switch opticsType
             case {'pinhole','perspective'}
                 disp('Pinhole optics.  No focal distance');
+                val = NaN;
+            case {'environment'}
+                disp('Panorama rendering. No focal distance');
                 val = NaN;
             case 'lens'
                 % Focal distance given the object distance and the lens file

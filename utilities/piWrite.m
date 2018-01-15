@@ -33,11 +33,11 @@ piWrite(thisR);
 %}
 %%
 p = inputParser;
+
 p.addRequired('renderRecipe',@(x)isequal(class(x),'recipe'));
 
 % Format the parameters by removing spaces and forcing lower case.
 if ~isempty(varargin), varargin = ieParamFormat(varargin); end
-% p.addParameter('workingdir','',@isdir);
 
 % Copy over the whole directory
 p.addParameter('overwriteresources', true,@islogical);
@@ -237,7 +237,8 @@ for ofns = outerFields'
                     % case it is already in place (see above)                    
                     fileName = strcat(name,ext);
                     if ~(strcmp(ifn,'specfile') || strcmp(ifn,'lensfile'))
-                        if ~copyfile(currValue,workingDir)
+                        [success,~,id]  = copyfile(currValue,workingDir);
+                        if ~success && ~strcmp(id,'MATLAB:COPYFILE:SourceAndDestinationSame')
                             warning('Problem copying %s\n',currValue);
                         end
                         % Update the file for the relative path
