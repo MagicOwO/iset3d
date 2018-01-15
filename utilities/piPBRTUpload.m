@@ -1,17 +1,13 @@
-function [fnameZIP, artifact] = piFetchPBRT(aName,varargin)
-% Deprecated.  Use piPBRTFetch
-% FETCH a PBRT file from the RDT archive to a local directory.
+function [fnameZIP, artifact] = piPBRTUpload(zipFile,varargin)
+% UPLOAD a zipped PBRT data set to the RDT archive
 %
 % Syntax
-%  piFetchPBRT(artifactName,varargin)
+%  piPBRTUpload(zipFile,varargin)
 %
 % Required input
-%   artifactName - The base name of the artifact that can be found by a search
+%   zipFile - The full path to the file name of the zip file
 %   
 % Optional inputs
-%   destinationFolder - default is piRootPath/data
-%   unzip     - perform the unzip operation (default true)
-%   deletezip - delete zip after unzipping (default false)
 %
 % Return
 %   fnameZIP - full path to the zip file
@@ -29,35 +25,15 @@ function [fnameZIP, artifact] = piFetchPBRT(aName,varargin)
 
 % Examples
 %{
- % Specify the scene name, download it, and render it
- % By default, the download is to piRootPath/data
- [fnameZIP, artifact] = piFetchPBRT('whiteScene');
- [p,n,e] = fileparts(fnameZIP);
- name = fullfile(p,n); fname = [n,'.pbrt'];
-
- % Read the recipe from the pbrt scene file, 
- % which is contained inside a directory of the same name
- thisR = piRead(fullfile(dname,fname));
-
- % Render the output to the piRootPath/local output directory
- thisR.outputFile = fullfile(piRootPath,'local',fname); 
- scene = piRender(thisR);
-
- % View it
- vcAddObject(scene); sceneWindow;
+ zipFile = fullfile(isetbioDataPath,'pbrtscenes','SlantedBar.zip')
+ piPBRTUpload(
 %}
 %{
- % By default, this places the data in piRootPath/data.  
- % You could set the 'deletezip', true parameter.
- [fnameZIP, artifact] = piFetchPBRT('sanmiguel');
-
- % Assumes the scene pbrt file is in piRootPath/data
- % And places the output in piRootPath/local
- s_sanmiguel;
+ 
 %}
 
 warning('Calling piPBRTFetch.  This routine is deprecated').
-piPBRTFetch(aName,varargin{:});
+piPBRTFetch(zipFile,varargin{:});
 
 end
 

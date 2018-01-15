@@ -36,9 +36,9 @@ function rays = rtSourceToEntrance(obj, pointSource, jitterFlag, rtType, subSect
 
 %% Parameter checking
 
-if ieNotDefined('jitterFlag'),     jitterFlag = false;     end
-if ieNotDefined('rtType'),         rtType = 'realistic';   end
-if ieNotDefined('subSection'),     subSection = [];    end
+if notDefined('jitterFlag'),     jitterFlag = false;     end
+if notDefined('rtType'),         rtType = 'realistic';   end
+if notDefined('subSection'),     subSection = [];    end
 
 % Define rays object
 rays = rayC();    % Classic rays
@@ -111,7 +111,7 @@ rays.distance  = zeros(nPts, 1);
 % by the objects.  We do that here.
 
 % If this variable is included, we process for scene depth occlusions
-% if(~ieNotDefined('depthTriangles'))
+% if(~notDefined('depthTriangles'))
 % %if(false)
 %     
 %     %setup origin and direction of rays
@@ -225,7 +225,7 @@ rays.aExitInt.XY   = zeros(length(aGrid.X), 2);
 
 % Not sure what this was, but depthTriangles was an older idea we had.
 %     %if (false)
-%     if(~ieNotDefined('depthTriangles'))
+%     if(~notDefined('depthTriangles'))
 %         if (~isempty(blockedRays > 0))
 %             rays.aEntranceInt.XY(blockedRays,:) = [];
 %             rays.aMiddleInt.XY(blockedRays,:) = [];

@@ -11,7 +11,7 @@ function LF = LF(obj,position)
 % AL Vistasoft Copyright 2014
 
 
-if ieNotDefined('position'), position = 'out'; end
+if notDefined('position'), position = 'out'; end
 
 switch position
     case 'in'

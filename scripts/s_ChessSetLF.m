@@ -10,7 +10,7 @@
 %   1063 s       192            128
 %
 % The ChessSet scene data are fairly large, so we do not include it in the
-% github repository.  To download it, use the piFetchPBRT command below.
+% github repository.  To download it, use the piPBRTFetch command below.
 %
 % Downloading requires that you have the RemoteDataToolbox installed.
 % <https://github.com/isetbio/RemoteDataToolbox.git>.
@@ -39,7 +39,7 @@ thisR = piRead(fname);
 
 % Set up LF camera
 thisR.set('camera','light field');
-thisR.set('n microlens',[192 192]);
+thisR.set('n microlens',[128 128]);
 thisR.set('n subpixels',[7, 7]);
 
 %  Configure for big aperture and pbrt parameters
@@ -53,7 +53,7 @@ thisR.set('autofocus',true);
 %% Write the pbrt file we will render
 
 [p,n,e] = fileparts(fname); 
-thisR.outputFile = fullfile(piRootPath,'local',[n,e]);
+thisR.outputFile = fullfile(piRootPath,'local','chessLF',[n,e]);
 piWrite(thisR);
 
 %% Render with the Docker container

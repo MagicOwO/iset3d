@@ -9,45 +9,26 @@ function [ieObject, result] = piRender(thisR,varargin)
 %          is a full path to a scene pbrt file.
 %
 % OPTIONAL input parameter/val
+%  oi/scene   - You can use parameters from oiSet or sceneSet that
+%               will be applied to the rendered ieObject prior to return.
 %  renderType - render radiance, depth or both (default).  If the input is
 %               a fullpath to a file, then we only render the radiance
 %               data. Ask if you want this changed to permit a depth map.
-%
+%               The coordinates option is a metadata type available in
+%               pbrt-v3-spectral that returns the global (x,y,z)
+%               coordinates of each intersection in the image. 
+%  vesion       - PBRT version, 2 or 3
+%  
 % RETURN
-%   ieObject - an ISET scene. oi, or a depth map image
+%   ieObject - an ISET scene, oi, or a depth map image
 %
-% Examples:
-%
-%  Scene files are in pbrt-v2-spectral on wandell's home account.  We
-%  will start putting them up on the RdtClient server before too long.
-%  We want to figure out the format and neatening, first.
-%
-%   sceneFile = '/home/wandell/pbrt-v2-spectral/pbrt-scenes/bunny.pbrt';
-%   sceneFile = '/home/wandell/pbrt-v2-spectral/pbrt-scenes/bump-sphere.pbrt';
-%   sceneFile = '/home/wandell/pbrt-v2-spectral/pbrt-scenes/rtbSanmiguel.pbrt';
-%   sceneFile = '/home/wandell/pbrt-v2-spectral/pbrt-scenes/rtbTeapot-metal.pbrt';
-%   sceneFile = '/home/wandell/pbrt-v2-spectral/pbrt-scenes/rtbVilla-daylight.pbrt';
-%
+% See also s_piReadRender*.m
 %
 % TL SCIEN Stanford, 2017
 
 % Examples 
 %{
-   % Example 1 - run the docker container
-   sceneFile = '/home/wandell/pbrt-v2-spectral/pbrt-scenes/rtbVilla-daylight.pbrt';
-   [scene, outFile] = piRender(sceneFile);
-   ieAddObject(scene); sceneWindow; sceneSet(scene,'gamma',0.5);
-%}
-%{
-   % Example 2 - read the radiance file into an ieObject
-   % We are pretending in this case that it was created with a lens
-   radianceFile = '/home/wandell/pbrt-v2-spectral/pbrt-scenes/bunny.dat';
-   photons = piReadDAT(radianceFile, 'maxPlanes', 31);
-   oi = piOIcreate(photons);
-   ieAddObject(oi); oiWindow;
-%}
-%{
-   % Example 3 - render an existing pbrt file
+   % Render an existing pbrt file
    pbrtFile = '/Users/wandell/Documents/MATLAB/pbrt2ISET/local/teapot-area-light.pbrt';
    scene = piRender(pbrtFile);
    ieAddObject(scene); sceneWindow; sceneSet(scene,'gamma',0.5);
@@ -66,11 +47,14 @@ for ii=1:2:length(varargin)
     varargin{ii} = ieParamFormat(varargin{ii}); 
 end
 
-rTypes = {'radiance','depth','both'};
-p.addParameter('rendertype','both',@(x)(contains(x,rTypes))); 
+rTypes = {'radiance','depth','both','coordinates'};
+p.addParameter('rendertype','both',@(x)(ismember(x,rTypes))); 
+
+p.addParameter('version',2,@(x)isnumeric(x));
 
 p.parse(thisR,varargin{:});
 renderType = p.Results.rendertype;
+version    = p.Results.version;
 
 if ischar(thisR)
     % In this case, we are just rendering a pbrt file.  No depthFile.
@@ -83,13 +67,13 @@ if ischar(thisR)
     opticsType = thisR.get('optics type');
 
     if ~strcmp(renderType,'radiance')
-        warning('For a file name input, we only render radiance');
+        warning('For a file as input only radiance is rendered.');
         renderType = 'radiance';
     end
     
     [workingFolder, name, ~] = fileparts(pbrtFile);
     if(isempty(workingFolder))
-        error('We need an absolute path for the working folder.');
+        error('Absolute path required for the working folder.');
     end
     
 elseif isa(thisR,'recipe')
@@ -112,9 +96,23 @@ elseif isa(thisR,'recipe')
         depthRecipe = piRecipeConvertToDepth(thisR);
         
         % Always overwrite the depth file, but don't copy over the whole directory
-        piWrite(depthRecipe,'overwritefile',true,'overwritedir',false);
+        piWrite(depthRecipe,'overwritepbrtfile',true,...
+            'overwritelensfile',false,...
+            'overwriteresources',false);
         
         depthFile = depthRecipe.outputFile;
+    end
+    
+    % Set up a metadata render
+    if(strcmp(renderType,'coordinates'))
+        if(thisR.version ~= 3)
+            error('Coordinates metadata render only available right now for pbrt-v3-spectral.');
+        end
+        coordRecipe = piRecipeConvertToDepth(thisR,'metadata','coordinates');
+        piWrite(coordRecipe,'overwritepbrtfile',true,...
+            'overwritelensfile',false,...
+            'overwriteresources',false);
+        coordFile = coordRecipe.outputFile;
     end
     
 else
@@ -135,6 +133,9 @@ switch renderType
     case {'radiance'}
         filesToRender = {pbrtFile};
         label{1} = 'radiance';
+    case {'coordinates'}
+        filesToRender = {coordFile};
+        label{1} = 'coordinates';
     otherwise
         error('Cannot recognize render type.');
 end
@@ -150,7 +151,7 @@ for ii = 1:length(filesToRender)
     %% Build the docker command
     dockerCommand   = 'docker run -ti --rm';
     
-    if(thisR.version == 3)
+    if(thisR.version == 3 || version == 3)
         dockerImageName = 'vistalab/pbrt-v3-spectral';
     else
         dockerImageName = 'vistalab/pbrt-v2-spectral';
@@ -158,14 +159,9 @@ for ii = 1:length(filesToRender)
     
     [~,currName,~] = fileparts(currFile);
     
-    outFile = fullfile(workingFolder,[currName,'.dat']);
+    outFile = fullfile(workingFolder,'renderings',[currName,'.dat']);
     renderCommand = sprintf('pbrt --outfile %s %s', ...
         outFile, currFile);
-    
-    % Not sure why this is not needed here, or it is needed in RtbPBRTRenderer.
-    % if ~isempty(user)
-    %     dockerCommand = sprintf('%s --user="%s":"%s"', dockerCommand, user, user);
-    % end
     
     if ~isempty(workingFolder)
         if ~exist(workingFolder,'dir'), error('Need full path to %s\n',workingFolder); end
@@ -221,6 +217,9 @@ for ii = 1:length(filesToRender)
     elseif(strcmp(label{ii},'depth'))
         tmp = piReadDAT(outFile, 'maxPlanes', 31);
         depthMap = tmp(:,:,1); clear tmp;
+    elseif(strcmp(label{ii},'coordinates'))
+        tmp = piReadDAT(outFile, 'maxPlanes', 31);
+        coordMap = tmp(:,:,1:3); clear tmp; 
     end
     
     fprintf('*** Rendering time for %s:  %.1f sec ***\n\n',currName,elapsedTime);
@@ -238,7 +237,23 @@ if(strcmp(renderType,'depth'))
     return;
 end
 
+% Only return the coordinates metadata
+if(strcmp(renderType,'coordinates'))
+    ieObject = coordMap;
+    return;
+end
+
 % If radiance, return a scene or optical image
+
+% Remove renderType and version from varargin
+if(~isempty(varargin))
+    func = @(x)(strcmp(x,'rendertype') || strcmp(x,'version'));
+    lst = find(cellfun(func,varargin));
+    if(~isempty(lst))
+        varargin = cellDelete(varargin,[lst lst+1]);
+    end
+end
+
 switch opticsType 
     case 'lens'
         % If we used a lens, the ieObject is an optical image (irradiance).
@@ -258,8 +273,7 @@ switch opticsType
         % hack to ISETBIO to make it work there temporarily and created an
         % issue. (BW).
         ieObject = oiSet(ieObject,'optics model','ray trace');
-    
-    case 'pinhole'
+    case {'pinhole','environment'}
         % In this case, we the radiance describes the scene, not an oi
         ieObject = piSceneCreate(photons,'meanLuminance',100);
         ieObject = sceneSet(ieObject,'name',ieObjName);

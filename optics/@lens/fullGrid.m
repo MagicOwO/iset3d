@@ -2,8 +2,8 @@ function aGrid = fullGrid(obj,randJitter, rtType)
 % Build the full sampling grid, possibly adding a little jitter
 % to avoid aliasing artifacts
 
-if (ieNotDefined('randJitter')), randJitter = false; end
-if (ieNotDefined('rtType')), rtType = 'realistic'; end
+if (notDefined('randJitter')), randJitter = false; end
+if (notDefined('rtType')), rtType = 'realistic'; end
 
 if (strcmp(rtType, 'ideal'))
     % If an ideal rtType, use the middle aperture as the front

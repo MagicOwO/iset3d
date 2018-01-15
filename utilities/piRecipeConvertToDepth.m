@@ -17,7 +17,9 @@ function depthRecipe = piRecipeConvertToDepth(recipe,varargin)
 
 p = inputParser;
 p.addRequired('recipe',@(x)isequal(class(x),'recipe'));
+p.addParameter('metadata','depth',@ischar);
 p.parse(recipe,varargin{:});
+metadata = p.Results.metadata;
 
 depthRecipe = copy(recipe);
 
@@ -29,16 +31,20 @@ if(recipe.version == 3)
 else 
     integrator = struct('type','SurfaceIntegrator','subtype','metadata');
 end
-integrator.strategy.value = 'depth'; 
+integrator.strategy.value = metadata; 
 integrator.strategy.type = 'string';
 depthRecipe.integrator = integrator;
+
+% For version 3, we have to turn off the weighting on the camera
+if(recipe.version == 3)
+    depthRecipe.camera.noweighting.value = 'true';
+    depthRecipe.camera.noweighting.type = 'bool';
+end
 
 % Change sampler type for better depth sampling
 sampler = struct('type','Sampler','subtype','stratified');
 sampler.jitter.value = 'false';
 sampler.jitter.type = 'bool';
-sampler.pixelsamples.value = 8;
-sampler.pixelsamples.type = 'integer';
 sampler.xsamples.value= 1;
 sampler.xsamples.type = 'integer';
 sampler.ysamples.value = 1;
@@ -60,7 +66,7 @@ end
 
 % Assign the right depth output file.  Deep copy issue here?
 [workingFolder, name, ~] = fileparts(recipe.outputFile);
-depthFile   = fullfile(workingFolder,strcat(name,'_depth.pbrt'));
+depthFile   = fullfile(workingFolder,sprintf('%s_%s.pbrt',name,metadata));
 depthRecipe.outputFile = depthFile;
 
 end
