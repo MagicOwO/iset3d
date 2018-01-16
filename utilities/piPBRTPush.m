@@ -91,7 +91,7 @@ fprintf('Upload complete. \n');
 %% Create return variables
 % Print the artifacts, return the list, and find the index of this file in
 % the artifacts list 
-artifacts = rd.listArtifacts('print',true);
+artifacts = rd.listArtifacts('print',true,'sortField','artifactId');
 [~,idx] = ismember(name,{artifacts(:).artifactId});
 
 end

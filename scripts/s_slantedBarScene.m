@@ -27,13 +27,13 @@ ieInit;
 if ~piDockerExists, piDockerConfig; end
 
 %% Read the pbrt scene
-fname = fullfile(piRootPath,'data','texturedPlane','texturedPlane.pbrt');
+fname = fullfile(piRootPath,'data','SlantedBar','slantedBar.pbrt');
 
 % Read the main scene pbrt file.  Return it as a recipe
 thisR = piRead(fname);
 
 % Setup working folder
-workingDir = fullfile(piRootPath,'local','texturedPlane');
+workingDir = fullfile(piRootPath,'local','slantedBar');
 if(~isdir(workingDir))
     mkdir(workingDir);
 end
@@ -62,31 +62,13 @@ translate = 1000; % mm
 % at the origin and looking down the positive y-axis. 
 %
 % Note: The order of scaling and translating matters!
-piMoveObject(thisR,'Plane','Scale',[scale scale scale]); % The plane is oriented in the x-z plane
-piMoveObject(thisR,'Plane','Translate',[0 translate 0]); 
+piMoveObject(thisR,'1_WhiteCube','Scale',[scale scale scale]);
+% The plane is oriented in the x-z plane
+piMoveObject(thisR,'1_WhiteCube','Translate',[0 translate 0]); 
 
-%% Attach a desired texture
-
-% Let's add a resolution chart texture from an exr file.
-
-% Since the plane is square, the texture should also be square. Otherwise
-% you should scale the plane appropriately in the above step. You can find
-% some textures to use in pbrt2ISET --> data --> imageTextures.
-%
-% The texture also needs to be an EXR file. You can use OSX Preview app to
-% convert image files. In the future, we will also add in our docker
-% conversion tools into pbrt2ISET (imageMagick thing).
-imageName = 'squareResolutionChart.exr';
-imageFile = fullfile(piRootPath,'data','imageTextures',imageName);
-
-% The original file has a dummy texture called "dummyTexture.exr." We use
-% pbrt2ISET find and replace this texture with one of our own. Be sure to
-% copy it to the right folder location!
-% TODO: Should we have piWrite check for textures in the world block and
-% copy them automatically? Then we would have the user put in an absolute
-% path here instead of a relative one.
-copyfile(imageFile,workingDir);
-thisR = piWorldFindAndReplace(thisR,'dummyTexture.exr',imageName);
+piMoveObject(thisR,'2_BlackCube','Scale',[scale scale scale]);
+% The plane is oriented in the x-z plane
+piMoveObject(thisR,'2_BlackCube','Translate',[0 translate 0]); 
 
 %% Write out a new pbrt file
 

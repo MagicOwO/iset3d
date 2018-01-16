@@ -24,4 +24,14 @@
   exist(zipFile,'file')
   [artifacts, idx] = piPBRTPush(zipFile,'rdtclient',rd);
 %}
+%{
+  zipFile = fullfile(piRootPath,'data','SlantedBar.zip');
+  exist(zipFile,'file')
+  [artifacts, idx] = piPBRTPush(zipFile,'rdtclient',rd);
+%}
+%{
+  zipFile = fullfile(piRootPath,'data','texturedPlane.zip');
+  exist(zipFile,'file')
+  [artifacts, idx] = piPBRTPush(zipFile,'rdtclient',rd);
+%}
 
