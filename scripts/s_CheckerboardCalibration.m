@@ -1,4 +1,5 @@
-%% Render a series of checkerboard images
+%% Render a series of checkerboard images - PBRT-V3
+%
 % This script renders a series of randomly translated and rotated
 % checkerboards through a realistic camera lens (pbrt-v3-spectral.) The
 % checkerboard is generated using the texturedPlane scene, and then rotated
@@ -7,6 +8,8 @@
 % camera intrinstics and extrinsics.
 %
 % TL SCIEN 2017
+%
+% See also
 
 %% Initialize ISET and Docker
 
