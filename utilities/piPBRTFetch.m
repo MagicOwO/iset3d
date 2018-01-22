@@ -28,31 +28,15 @@ function [fnameZIP, artifact] = piPBRTFetch(aName,varargin)
 
 % Examples
 %{
- % Specify the scene name, download it, and render it
+ % Specify the artifact name, download it, and render it
  % By default, the download is to piRootPath/data
  [fnameZIP, artifact] = piPBRTFetch('whiteScene');
+
+ % Read the recipe from the pbrt scene file, which is contained inside a
+ % directory of the same name 
  [p,n,e] = fileparts(fnameZIP);
- name = fullfile(p,n); fname = [n,'.pbrt'];
-
- % Read the recipe from the pbrt scene file, 
- % which is contained inside a directory of the same name
+ dname = fullfile(p,n); fname = [n,'.pbrt'];
  thisR = piRead(fullfile(dname,fname));
-
- % Render the output to the piRootPath/local output directory
- thisR.outputFile = fullfile(piRootPath,'local',fname); 
- scene = piRender(thisR);
-
- % View it
- vcAddObject(scene); sceneWindow;
-%}
-%{
- % By default, this places the data in piRootPath/data.  
- % You could set the 'deletezip', true parameter.
- [fnameZIP, artifact] = piPBRTFetch('sanmiguel');
-
- % Assumes the scene pbrt file is in piRootPath/data
- % And places the output in piRootPath/local
- s_sanmiguel;
 %}
 
 %% Parse inputs
@@ -72,7 +56,22 @@ deleteFlag = p.Results.deletezip;
 rdt = RdtClient('isetbio');
 rdt.crp('/resources/scenes/pbrt');
 a = rdt.searchArtifacts(aName);
-[fnameZIP, artifact] =rdt.readArtifact(a(1),'destinationFolder',destinationFolder);
+
+% There should only be one artifact matching the aName.  But in case there
+% are more, we have the user select.
+if length(a) > 1
+    fprintf('Artifact names\n------------\n');
+    for ii=1:length(a)
+        fprintf('%d - %s\n',a(ii).artifactId);
+    end
+    ii = input('Select a number','s');
+else
+    ii = 1;
+end
+
+% Go git it.
+[fnameZIP, artifact] =rdt.readArtifact(a(ii),...
+    'destinationFolder',destinationFolder);
 
 %% If download succeeded, check if unzip and delete are requested
 if exist(fnameZIP,'file')
