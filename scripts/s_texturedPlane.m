@@ -1,21 +1,27 @@
-%% Demonstrate how to use the texturedPlane scene
+%% The texturedPlane scene - a way to measure planar targets
+%
+% This script enables you to place a spatial pattern (texture) onto a plane in
+% the PBRT scene file.  You can then render the scene through optics using
+% PBRT and measure properties of the irradiance.
 %
 % The textured plane scene consists of a single plane sized 1 m x 1 m.
+% Initially, the plane is located at the origin (0,0,0) and rotated tp be
+% perpendicular to the y-axis (optical axis) and in the x-z plane.
 %
-% Initially, it is located at the origin (0,0,0) and rotated tp be
-% perpendicular to the y-axis (optical axis) and in the x-z plane. 
+% The test pattern is placed on the plane by specifying an EXR image file. We
+% are starting to store EXR test images in data/imageTextures.
 %
-% You place a texture on the plane by specifying an EXR image file. 
+% Computationa
+%  Because the camera is located at (0,0,0), you will need to scale and
+%  translate the plane in order to see it. We use the functions piMoveObject to
+%  translate. The utilities for this are evolving.
 %
-% Because the camera is located at (0,0,0), you will need to scale and translate
-% the plane in order to see it. We use the functions piMoveObject to translate.
-% The utilities for this are evolving.
-%
-% Side note: The "no filtering" flag for the texture is automatically
-% turned on, so there is no anti-aliasing filter applied during rendering
-% when we sample the texture. This is very important, and was added by me
-% (TL) in PBRTv2. However, given how important it is I think it would be
-% worth double checking to make sure it's operating as we want it to.
+% Side notes: 
+%   The "no filtering" flag for the texture is automatically turned on, so there
+%   is no anti-aliasing filter applied during rendering when we sample the
+%   texture. This is very important, and was added by TL in PBRTv2. However,
+%   given how important it is you should always check to make sure that
+%   filtering is off!
 %
 % TL SCIEN 2017
 %
