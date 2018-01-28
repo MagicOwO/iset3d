@@ -1,23 +1,32 @@
 function metadataRecipe = piRecipeConvertToMetadata(recipe,varargin)
-% Convert radiance recipe to a corresponding metadata map (e.g. depth) recipe
+% Convert radiance recipe to a metadata recipe 
 %
 % Syntax:
 %    metadataRecipe = piRecipeConvertToMetadata(recipe,varargin)
 %
-% Input
+% Inputs:
 %  recipe - a typical radiance input recipe
 %
-% Return
-%  metadataRecipe - the radiance recipe is converted to a a metadata recipe for the
-%  same file. Metadata types include "depth,mesh,material,or coordinates(v3)"
+% Optional key/value pairs:
+%  'metadata' -  {'depth','mesh','material'} (V2)
+%  'metadata' -  {'depth','mesh','material','coordinates'} (V3)
+%
+% Outputs:
+%  metadataRecipe - the metadata recipe, a modification of the recipe.
 %
 % TL, SCIEN Stanford, 2017
+%
+% See also  piRender.m
+%
 
 %% Verify and clone the radiance recipe
 
 p = inputParser;
 p.addRequired('recipe',@(x)isequal(class(x),'recipe'));
-p.addParameter('metadata','depth',@ischar); % By default it is a depth map
+
+metaTypes = {'depth','mesh','material','coordinates'};
+p.addParameter('metadata','depth',@(x)(ismember(x,metaTypes))); % By default it is a depth map
+
 p.parse(recipe,varargin{:});
 metadata = p.Results.metadata;
 
