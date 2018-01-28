@@ -27,9 +27,9 @@ if ~piDockerExists, piDockerConfig; end
 
 %% Import the pbrt file
 
-% fname = fullfile(piRootPath,'data','NumbersAtDepth','numbersAtDepth.pbrt');
+fname = fullfile(piRootPath,'data','NumbersAtDepth','numbersAtDepth.pbrt');
 % fname = fullfile(piRootPath,'data','teapot-area','teapot-area-light.pbrt');
-fname = fullfile(piRootPath,'data','ChessSet','chessSet.pbrt');
+% fname = fullfile(piRootPath,'data','ChessSet','chessSet.pbrt');
 
 if ~exist(fname,'file'), error('File not found'); end
 thisR = piRead(fname);
