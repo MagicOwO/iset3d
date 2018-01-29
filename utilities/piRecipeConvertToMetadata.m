@@ -1,27 +1,36 @@
-function depthRecipe = piRecipeConvertToDepth(recipe,varargin)
-% Convert radiance recipe to a corresponding depth map recipe
+function metadataRecipe = piRecipeConvertToMetadata(recipe,varargin)
+% Convert radiance recipe to a metadata recipe 
 %
 % Syntax:
-%    depthRecipe = piRecipeConvertToDepth(recipe,varargin)
+%    metadataRecipe = piRecipeConvertToMetadata(recipe,varargin)
 %
-% Input
+% Inputs:
 %  recipe - a typical radiance input recipe
 %
-% Return
-%  depthRecipe - the radiance recipe is converted to a depth recipe for the
-%  same file
+% Optional key/value pairs:
+%  'metadata' -  {'depth','mesh','material'} (V2)
+%  'metadata' -  {'depth','mesh','material','coordinates'} (V3)
+%
+% Outputs:
+%  metadataRecipe - the metadata recipe, a modification of the recipe.
 %
 % TL, SCIEN Stanford, 2017
+%
+% See also  piRender.m
+%
 
 %% Verify and clone the radiance recipe
 
 p = inputParser;
 p.addRequired('recipe',@(x)isequal(class(x),'recipe'));
-p.addParameter('metadata','depth',@ischar);
+
+metaTypes = {'depth','mesh','material','coordinates'};
+p.addParameter('metadata','depth',@(x)(ismember(x,metaTypes))); % By default it is a depth map
+
 p.parse(recipe,varargin{:});
 metadata = p.Results.metadata;
 
-depthRecipe = copy(recipe);
+metadataRecipe = copy(recipe);
 
 %% Adjust the recipe values
 
@@ -33,12 +42,12 @@ else
 end
 integrator.strategy.value = metadata; 
 integrator.strategy.type = 'string';
-depthRecipe.integrator = integrator;
+metadataRecipe.integrator = integrator;
 
 % For version 3, we have to turn off the weighting on the camera
 if(recipe.version == 3)
-    depthRecipe.camera.noweighting.value = 'true';
-    depthRecipe.camera.noweighting.type = 'bool';
+    metadataRecipe.camera.noweighting.value = 'true';
+    metadataRecipe.camera.noweighting.type = 'bool';
 end
 
 % Change sampler type for better depth sampling
@@ -49,7 +58,7 @@ sampler.xsamples.value= 1;
 sampler.xsamples.type = 'integer';
 sampler.ysamples.value = 1;
 sampler.ysamples.type = 'integer';
-depthRecipe.sampler = sampler;
+metadataRecipe.sampler = sampler;
 
 % Change filter for better depth sampling
 filter = struct('type','PixelFilter','subtype','box');
@@ -57,7 +66,7 @@ filter.xwidth.value = 0.5;
 filter.xwidth.type = 'float';
 filter.ywidth.value = 0.5;
 filter.ywidth.type = 'float';
-depthRecipe.filter = filter;
+metadataRecipe.filter = filter;
 
 % Error checking
 if(isempty(recipe.outputFile))
@@ -66,8 +75,8 @@ end
 
 % Assign the right depth output file.  Deep copy issue here?
 [workingFolder, name, ~] = fileparts(recipe.outputFile);
-depthFile   = fullfile(workingFolder,sprintf('%s_%s.pbrt',name,metadata));
-depthRecipe.outputFile = depthFile;
+metadataFile   = fullfile(workingFolder,sprintf('%s_%s.pbrt',name,metadata));
+metadataRecipe.outputFile = metadataFile;
 
 end
 
