@@ -31,7 +31,7 @@ thisR.set('autofocus',true);      % Sets focal distances to 300
 %% Set up Docker 
 
 [p,n,e] = fileparts(fname); 
-thisR.set('outputFile',fullfile(piRootPath,'local',[n,e]));
+thisR.set('outputFile',fullfile(piRootPath,'local','NumbersAtDepth',[n,e]));
 piWrite(thisR);
 
 %% Render with the Docker container
@@ -42,7 +42,7 @@ vcAddObject(oi); oiWindow; oiSet(oi,'gamma',0.5);
 
 %%
 thisR.set('aperture',2);      % Try varying for depth of field effects
-piWrite(thisR, 'overwritedir', true);
+piWrite(thisR, 'overwrite pbrt file', true);
 oi = piRender(thisR);
 oi = oiSet(oi,'name','small aperture');
 vcAddObject(oi); oiWindow; oiSet(oi,'gamma',0.5);   

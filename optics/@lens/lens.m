@@ -127,6 +127,24 @@ classdef lens <  handle
             end
         end
         
+        %% Helper
+        function files = list(~,varargin)
+            % List and summarize the lenses in data/lens
+            p = inputParser;
+            
+            % If you want the list returned without a print
+            p.addParameter('quiet',false,@islogical);
+            p.parse(varargin{:});
+            
+            quiet = p.Results.quiet;  
+            
+            files = dir(fullfile(piRootPath,'data','lens','*.dat'));
+            if quiet, return; end
+            
+            for ii=1:length(files)
+                fprintf('%d - %s\n',ii,files(ii).name);
+            end
+        end
         
         %% Get properties
         function res = get(obj,pName,varargin)
