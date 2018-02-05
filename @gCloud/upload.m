@@ -1,4 +1,9 @@
-function [ obj ] = upload( obj, scene )
+function [ obj ] = upload( obj, scene, varargin )
+
+p = inputParser;
+p.addParameter('group',[],@isnumeric);
+p.parse(varargin{:});
+inputs = p.Results;
 
 % 1. Zip all files except for the *.pbrt files from top level directory
 
@@ -34,6 +39,10 @@ target.camera = scene.camera;
 target.local = fullfile(sceneFolder,sprintf('%s.pbrt',sceneFile));
 target.remote = fullfile(cloudFolder,sprintf('%s.pbrt',sceneFile));
 target.renderingComplete = 0;
+target.renderingStarted = 0;
+if isempty(inputs.group) == false
+    target.groupLabel = inputs.group;
+end
 
 obj.targets = cat(1,obj.targets,target);      
 

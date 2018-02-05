@@ -7,17 +7,28 @@ p.parse(varargin{:});
 
 isetObj = cell(1,length(obj.targets));
 
-[targetFolder] = fileparts(obj.targets(1).local);
-[remoteFolder, remoteFile] = fileparts(obj.targets(1).remote);
 
-cmd = sprintf('gsutil rsync -r %s %s',remoteFolder,targetFolder);
-[status, result] = system(cmd);
+allTargets = {obj.targets(:).local};
+targetFolders = cellfun(@(x) fileparts(x),allTargets,'UniformOutput',false);
 
+allRemotes = {obj.targets(:).remote};
+remoteFolders = cellfun(@(x) fileparts(x),allRemotes,'UniformOutput',false);
+
+[uniqueRemotes, uniqueIDs] = unique(remoteFolders);
+uniqueTargets = targetFolders(uniqueIDs);
+
+for jj=1:length(uniqueIDs)
+
+    cmd = sprintf('gsutil rsync -r %s %s',uniqueRemotes{jj},uniqueTargets{jj});
+    [status, result] = system(cmd);
+end
 
 for t=1:length(obj.targets)
     
     [targetFolder] = fileparts(obj.targets(t).local);
     [remoteFolder, remoteFile] = fileparts(obj.targets(t).remote);
+    
+    
     
     outFile = sprintf('%s/renderings/%s.dat',targetFolder,remoteFile);
     try
