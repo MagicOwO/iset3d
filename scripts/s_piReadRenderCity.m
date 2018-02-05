@@ -37,6 +37,14 @@ thisR = piRead(fname);
 % Set camera position to (0,0,-3000)
 thisR.set('from',[0 0 -3000]);
 
+% Experimenting with different directions
+
+% Pointing towards some kind of fire truck
+thisR.set('to',[1.4e+03, 3.35e+04 -1500]);  
+
+% Pointing towards a yellow school bus
+% thisR.set('to',[-1.4e+03, -3.35e+04 -1500]);  
+
 %% Set up Docker directory
 
 % Write out the pbrt scene file, based on thisR.  By def, to the working directory.
@@ -49,6 +57,6 @@ piWrite(thisR);
 scene = piRender(thisR);
 
 % Show it in ISET
-vcAddObject(scene); sceneWindow; sceneSet(scene,'gamma',0.5);     
+vcAddObject(scene); sceneWindow; sceneSet(scene,'gamma',1);     
 
 %%

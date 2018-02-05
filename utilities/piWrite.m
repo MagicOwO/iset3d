@@ -4,14 +4,24 @@ function workingDir = piWrite(renderRecipe,varargin)
 % Syntax
 %   workingDir = piWrite(recipe,varargin)
 %
-% The pbrt scene file and all of its resources files are written out
-% in a working directory that will be mounted by the docker container.
+% The pbrt scene file and all of its resources files are written out in a
+% working directory.  The working directory will be mounted by the docker
+% container.
 %
-% In some cases, there are multiple PBRT files that use the same
-% resources files.  If you know the resources files are already there,
-% you can set overwriteresources to false.  Similarly if you do not
-% want to overwrite the pbrt scene file, set overwritepbrtfile to
-% false.
+% The output files produced by piWrite change the original PBRT scene file
+% by extracting all of the text between 'WorldBegin' and 'WorldEnd' and
+% writing that into a file called "world.pbrt" which is in the same
+% directory as the PBRT scnee file.  The text is replaced by an
+%
+%   Include "world.pbrt" directive.
+%
+% This is done so that we do not have to upload that information multiple
+% times, saving us space and transfer time when using Google Cloud.
+%
+% Also, typically there are multiple PBRT files that use the same resources
+% files.  If the resources files are already there, you can set the
+% overwriteresources flag to false.  Similarly if you do not want to
+% overwrite the pbrt scene file, set overwritepbrtfile to false.
 %
 % Input
 %   renderRecipe:  a recipe object describing the rendering parameters.  This
@@ -19,17 +29,30 @@ function workingDir = piWrite(renderRecipe,varargin)
 %       directories containing all of the pbrt scene data.
 %
 % Optional parameter/values
-%   overwritepbrtfile  - If scene PBRT file exists,    overwrite (default true)
-%   overwriteresources - If the resources files exist, overwrite (default true) 
+%   overwritepbrtfile  - Force overwrite of the scene PBRT file, (default true)
+%   overwriteresources - Force overwrite of resources files,     (default true) 
+%   overwriteworldfile - Force overwrite of the world.pbrt file  (default false) 
 %
 % Return
 %    workingDir - path to the output directory mounted by the Docker containe
 %
 % TL Scien Stanford 2017
 
+% Examples:
+%{
+ pbrtFile = fullfile(piRootPath,'data','teapot-area','teapot-area-light.pbrt');
+ thisR = piRead(pbrtFile);
+ % Write out the pbrt scene file, based on thisR.  By def, to the working directory.
+ [p,n,e] = fileparts(pbrtFile); 
+ thisR.set('outputFile',fullfile(piRootPath,'local','testworld',[n,e]));
+ piWrite(thisR);
+%}
 %{
 piWrite(thisR,'overwrite resources',false,'overwrite pbrt file',true);
 piWrite(thisR);
+%}
+%{
+piWrite(thisR,'overwrite world file',true);
 %}
 %%
 p = inputParser;
@@ -40,20 +63,23 @@ p.addRequired('renderRecipe',@(x)isequal(class(x),'recipe'));
 if ~isempty(varargin), varargin = ieParamFormat(varargin); end
 
 % Copy over the whole directory
-p.addParameter('overwriteresources', true,@islogical);
+p.addParameter('overwriteresources',true,@islogical);
 
 % Overwrite the specific scene file
 p.addParameter('overwritepbrtfile',true,@islogical);
+
+% We assume the world file, once written, is fixed.
+p.addParameter('overwriteworldfile',false,@islogical);
 
 % Force overwrite of the lens file
 p.addParameter('overwritelensfile',true,@islogical);
 
 p.parse(renderRecipe,varargin{:});
 
-% workingDir          = p.Results.workingdir;
 overwriteresources  = p.Results.overwriteresources;
 overwritepbrtfile   = p.Results.overwritepbrtfile;
 overwritelensfile   = p.Results.overwritelensfile;
+overwriteworldfile  = p.Results.overwriteworldfile;
 
 %% Copy the input directory to the Docker working directory
 
@@ -277,16 +303,24 @@ for ofns = outerFields'
     
 end
 
+%% Close file, without the world contents, but with an include directive
 
-%% Write out WorldBegin/WorldEnd
-
-for ii = 1:length(renderRecipe.world)
-    currLine = renderRecipe.world{ii};
-    fprintf(fileID,'%s \n',currLine);
-end
-
-%% Close file
+fprintf(fileID,'WorldBegin\nInclude "world.pbrt"\nWorldEnd\n');
 
 fclose(fileID);
+
+%% Write out WorldBegin/WorldEnd text into the world.pbrt
+worldFile = fullfile(workingDir,'world.pbrt');
+
+if ~exist(worldFile,'file') || overwriteworldfile
+    fprintf('Writing world.pbrt file\n');
+    worldID = fopen(worldFile,'w');
+    for ii = 1:length(renderRecipe.world)
+        currLine = renderRecipe.world{ii};
+        fprintf(worldID,'%s \n',currLine);
+    end
+    fclose(worldID);
+end
+
 
 end

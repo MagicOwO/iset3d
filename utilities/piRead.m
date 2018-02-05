@@ -33,17 +33,22 @@ function thisR = piRead(fname,varargin)
 %    
 % This function will not work in PBRT files, that do not meet these criteria.
 %
-% Text beyond the WorldBegin/WorldEnd block is stored in recipe.world. 
+% Text within the WorldBegin/WorldEnd block is stored in recipe.world. 
 %
 % Blocks we can read are
 %   
 %   Camera, SurfaceIntegrator, Sampler, PixelFilter, and Film, and Renderer
 %
-% Example
-%   pbrtFile = '/home/wandell/pbrt-v2-spectral/pbrt-scenes/sanmiguel.pbrt';
-%   recipe = piRecipe(pbrtFile);
-%
 % TL Scienstanford 2017
+% 
+% See also: piWrite, piRender
+
+% Examples:
+%{
+ pbrtFile = fullfile(piRootPath,'data','teapot-area','teapot-area-light.pbrt');
+ recipe = piRead(pbrtFile);
+%}
+
 
 %%
 p = inputParser;
@@ -78,24 +83,31 @@ fclose(fileID);
 %% Split text lines into pre-WorldBegin and WorldBegin sections
 
 worldBeginIndex = 0;
+worldEndIndex = 0;
 
 for ii = 1:length(txtLines)
     currLine = txtLines{ii};
-    if(~isempty(strfind(currLine,'WorldBegin')))
+    if(~isempty(strfind(currLine,'WorldBegin'))) %#ok<STREMP>
         worldBeginIndex = ii;
+    end
+    if(~isempty(strfind(currLine,'WorldEnd'))) %#ok<STREMP>
+        worldEndIndex = ii;
         break;
     end
 end
-if(worldBeginIndex == 0)
-    warning('Cannot find WorldBegin.');
-    worldBeginIndex = ii;
+
+if(worldBeginIndex == 0) || (worldEndIndex == 0)
+    error('Cannot find either WorldBegin (%d) or WorldEnd (%d).',...
+        worldBeginIndex, worldEndIndex);
 end
 
-% Store the text in WorldBegin
-thisR.world = txtLines(worldBeginIndex:end);
+% Store the text in WorldBegin.
+thisR.world = txtLines((worldBeginIndex+1):(worldEndIndex-1));
 
 % Here are the text lines from before WorldBegin
 txtLines = txtLines(1:(worldBeginIndex-1));
+
+% Do we not store the txtLines from after WorldEnd?
 
 %% It would be nice to identify every block
 

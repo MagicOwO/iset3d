@@ -40,7 +40,7 @@ if(recipe.version == 3)
 else 
     integrator = struct('type','SurfaceIntegrator','subtype','metadata');
 end
-integrator.strategy.value = metadata; 
+integrator.strategy.value = metadata; % Could be mesh, material, depth or coordinates for V3
 integrator.strategy.type = 'string';
 metadataRecipe.integrator = integrator;
 
