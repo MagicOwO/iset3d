@@ -3,48 +3,49 @@ classdef lens <  handle
     %
     %   lens = lens(elOffset, elRadius, elAperture, elN, aperture, focalLength, center);
     %
-    % Distance units, when not otherwise specified, are millimeters.
+    % Distance units are millimeters, unless otherwise specified.
     %
-    % We represent multi-element lenses as a set of spherical lenses and
-    % circular apertures. The multiple elements are defined by a series of
-    % surfaces with a curvature, position, and index of refraction (as a
-    % function of wavelength).
+    % We represent multi-element lenses as a sequence of spherical surfaces and
+    % circular apertures. Each surface has a curvature, position, and index of
+    % refraction (as a function of wavelength).
     %
-    % We specify the position of each surface as the center of the
-    % spherical lens.  Rays travel from left (the scene) to right. The zero
-    % position is the right-most spherical surface. The film (sensor) is at
-    % a positive position.
+    % The surface position of each surface is specified with respect to the
+    % final component of the lens. Rays travel from left (the scene) to right
+    % (the image). The zero position is the right-most spherical surface. The
+    % film (sensor) is at a positive position.
     %
     %     Scene ->  | Lens Surfaces ->|   Film
     %                    -            0     +
     %
-    % Apertures are circular, their center is in the (0,0) position and
-    % they are specified by a single parameter (diameter in mm).
+    % Apertures are circular and their center is in the (0,0) position. Hence,
+    % apertures are specified by a single parameter (diameter in mm).
     %
     % The index of refraction (n) attached to a surface defines the
     % material to the left of the surface.
     %
-    % Lens files and surface arrays are specified from the front most
-    % element (closest to the scene), to the back-most element (closest to
-    % the sensor).  Hence, surface arrays are listed from negative
-    % positions to positive positions.
+    % Lens files and surface arrays are specified from the left most element
+    % (closest to the scene), to the right-most element (closest to the sensor).
+    % Hence, surface arrays are listed from negative positions to positive
+    % positions.
     %
-    % Pinhole cameras have no aperture and the pinhole lens will inherit
-    % this superclass. This will be a superclass that will be inherited by
-    % other classes in the future [BW/TL don't understand].
+    % The lens object works with the 'realistic' camera class. The 'pinhole'
+    % cameras has simpler properties.
     %
-    % We aim to be consistent with the PBRT lens files, and maybe the Zemax
-    % as far possible.
-    %
-    % Todo: consider a set function for better error handling.
-    %
-    % Example:
-    %  Create a lens object
-    %
-    %   thislens = lens();
-    %
+    % We aim to be consistent with the PBRT lens files, and the Zemax as far
+    % possible.
     %
     % AL Vistasoft Copyright 2014
+    %
+    % See also:
+    %    lens.draw, lens.plot, lens.set, lens.get
+
+    % Examples:
+    %{
+      % Create a lens object
+      thislens = lens('filename','dgauss.22deg.3.0mm.dat');
+      thislens.draw;
+      thislens.plot('focal distance');
+    %}
     
     properties
         name = 'default';
@@ -275,6 +276,7 @@ classdef lens <  handle
                                 abcd = obj.bbmGetValue('abcd');
                                 nW=size(abcd,3);
                                 dummy=eye(4);
+                                abcd_out = zeros(2,2,nW);
                                 for li=1:nW
                                     abcd_out(:,:,li)=dummy;
                                     abcd_out(1:2,1:2,li)=abcd(:,:,li);
@@ -286,7 +288,6 @@ classdef lens <  handle
                     else
                         res = obj.bbmGetValue('abcd');
                     end
-                    
                     
                 case {'opticalsystem'; 'optsyst';'opticalsyst';'optical system structure'}
                     % Get the equivalent optical system structure generated

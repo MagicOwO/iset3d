@@ -34,4 +34,10 @@
   exist(zipFile,'file')
   [artifacts, idx] = piPBRTPush(zipFile,'rdtclient',rd);
 %}
+%{
+  % A big city scene with many objects.  Block 1.  Placement of objects 2. BY HB
+  zipFile = fullfile(piRootPath,'data','MultiObject-City-1-Placement-2.zip');
+  exist(zipFile,'file')
+  [artifacts, idx] = piPBRTPush(zipFile,'rdtclient',rd);
+%}
 

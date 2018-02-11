@@ -47,12 +47,42 @@ if ~exist(fname,'file'), error('File not found'); end
 % Read the main scene pbrt file.  Return it as a recipe
 thisR = piRead(fname);
 
+%{
+% To choose a lens, we may need to find the distance to points 
+% near the center of the scene and set the lookAt correctly.
+% To explore the situation, we use the pinhole camera default and measure the
+% depth map.
+
+% Write out the data 
+[p,n,e] = fileparts(fname); 
+thisR.outputFile = fullfile(piRootPath,'local',[n,e]);
+piWrite(thisR);
+scene = piRender(thisR);
+depthMap = sceneGet(scene,'depthmap');
+% This is an alternative this would run faster.
+% depthMap = piRender(thisR,'renderType','depth');
+
+% Confirm that it ran OK
+% ieAddObject(scene); sceneWindow;
+% Show the depth map
+vcNewGraphWin; mesh(depthMap);
+vcNewGraphWin; hist(depthMap(:),100); grid on
+%}
+%{
+% Explore lens properties
+l = lens; lNames = l.list;
+thisLens = lens('filename',lNames(5).name);
+thisLens.plot('focal distance');
+
+%}
+
 %% Default is a relatively low resolution (256).
 
+% We need to choose a lens file, probably by hand.
 thisR.set('camera','realistic');
 thisR.set('aperture',2);  % The number of rays should go up with the aperture 
-thisR.set('film resolution',64);
-thisR.set('rays per pixel',96);
+thisR.set('film resolution',256);
+thisR.set('rays per pixel',64);
 
 % We need to move the camera far enough away so we get a decent view.
 objDist = thisR.get('object distance');
