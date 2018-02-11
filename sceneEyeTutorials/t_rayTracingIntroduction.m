@@ -36,15 +36,14 @@ ieInit;
 % ISETBIO and pbrt2ISET.
 % These scenes include:
 % 1. numbersAtDepth
-% ...
-%
-% You can find a description and sample images of these scenes in
-% isetbioDataPath/pbrtscenes.
-% TODO: Update the above scenes
+% 2. texturedPlane
+% 3. chessSet
+% 4. slantedBar
+% You can find a description and sample images of these scenes on the wiki
+% page (https://github.com/isetbio/isetbio/wiki/3D-Image-Formation). 
 
 % You can select a scene as follows:
 myScene = sceneEye('numbersAtDepth');
-% myScene = sceneEye('/Users/tlian/GitRepos/isetbio/isettools/data/pbrtscenes/NumbersAtDepth_flip/numbersAtDepth.pbrt');
 
 % ISETBIO requires a "working directory." If one is not specified when
 % creating a scene, the default is in isetbioRootPath/local. All data
@@ -60,9 +59,6 @@ myScene = sceneEye('numbersAtDepth');
 % parameters of the eye optics included in the raytracing. You can see a
 % list of the parameters available in the object structure:
 myScene
-
-% You can see the description of each parameter by...
-% TODO: How?
 
 % Let's render a quick, low quality retinal image first. Let's name this
 % render fastExample.
@@ -87,7 +83,7 @@ oiWindow;
 
 %% Step through accommodation
 % Now let's render a series of retinal images at different accommodations.
-% This section renders roughly in 1 min on a machine with 2 cores. 
+% This section renders roughly in 30 sec on a machine with 8 cores. 
 
 accomm = [1 5 10]; % in diopters
 opticalImages = cell(length(accomm),1);
