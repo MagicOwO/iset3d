@@ -115,6 +115,21 @@ switch ieParamFormat(param)
         elseif ismember(val,{'realisticDiffraction','realisticEye','realistic'})
             val = 'lens';
         end
+    case {'lensfile','specfile'}  % Do not use specfile.
+        opticsType = thisR.get('optics type');
+        switch opticsType
+            case {'pinhole','perspective'}
+                disp('Pinhole optics.  No lens file');
+                val = '';
+            case {'environment'}
+                disp('Panorama rendering. No lens file');
+                val = '';
+            case 'lens'
+                val = thisR.camera.specfile.value;
+            otherwise
+                error('Unknown optics type %s\n',opticsType);
+        end
+
     case 'focaldistance'
         opticsType = thisR.get('optics type');
         switch opticsType
@@ -126,6 +141,8 @@ switch ieParamFormat(param)
                 val = NaN;
             case 'lens'
                 % Focal distance given the object distance and the lens file
+                % To see the relationship between focal distance and all object
+                % distances use lens.plot('focal distance');
                 [p,flname,~] = fileparts(thisR.camera.specfile.value);
                 focalLength = load(fullfile(p,[flname,'.FL.mat']));
                 objDist = thisR.get('object distance');

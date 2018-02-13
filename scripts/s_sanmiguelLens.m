@@ -80,13 +80,18 @@ thisLens.plot('focal distance');
 
 % We need to choose a lens file, probably by hand.
 thisR.set('camera','realistic');
-thisR.set('aperture',2);  % The number of rays should go up with the aperture 
+thisR.set('aperture',1);  % The number of rays should go up with the aperture 
 thisR.set('film resolution',256);
 thisR.set('rays per pixel',64);
 
+%{
+thisLens = lens('filename',thisR.get('lensfile'));
+thisLens.plot('focal distance')
+thisR.set('object distance',30);
+thisR.get('object distance')
+%}
 % We need to move the camera far enough away so we get a decent view.
-objDist = thisR.get('object distance');
-thisR.set('object distance',100*objDist);
+thisR.set('object distance',20);
 thisR.set('autofocus',true);
 
 %% Set up Docker 
@@ -97,9 +102,9 @@ piWrite(thisR);
 
 %% Render with the Docker container
 
-scene = piRender(thisR);
+oi = piRender(thisR);
 
 % Show it in ISET
-vcAddObject(scene); sceneWindow; sceneSet(scene,'gamma',0.5);
+vcAddObject(oi); oiWindow; oiSet(scene,'gamma',0.5);
 
 %%
