@@ -1,69 +1,119 @@
-function fileWrite(obj, fullFileName, description)
-% Writes PBRT lens file from Scene3D data
+function fileWrite(obj, fullFileName, varargin)
+% Writes PBRT lens file
 %
-%   lens.fileWrite(fullFileName)
+% Syntax:
 %
-% The PBRT file has focal length information added to the header. This
-% function converts the PBRT matrix of data into the format that Scene3d
-% uses for a multielement lens.
+%   lens.fileWrite(fullFileName, varargun)
 %
-% The basic look of a PBRT lens file is this
+% Description:
 %
-%  # Name: 2ElLens.dat
-%  # Description: 2 Element simple lens
-%  # Focal length (in mm)
-%  50
-%  # Each row is a surface. The order of surfaces starts from the image and
-%  # heads to the sensor.  Zero is the position of the first lens surface.
-%  # Positive numbers are towards the lens, and negative numbers are towards
-%  # the image.
-%  #      Object < 0)    0=First Surface    0 < Sensor plane
-%  #
-%  #    radius (mm)	 offset      N       diameter (mm)
-%       67          1.5      1.65       10
-%       0           1.5      1.65       10
-%       -67         0	     1          10
-%  # END
+%  The PBRT file has focal length information added to the header. This
+%  function converts the PBRT matrix of data into the format that Scene3d
+%  uses for a multi-element lens.
 %
-% Always assume the sensor is to the right and the object world is to
-% the left.
+%  The PBRT lens file looks like this:
 %
-% To interpret the matrix, it is easiest to start at the bottom row and
-% read up.
+% # Name: 2ElLens
+% # Description: foobar
+% # units are mm
+% # Focal length 
+% 50.000
+% 
+% # Each row is a surface.
+% # They are ordered from the image to the sensor.
+% # Zero is the position of the first lens surface.
+% # Positive is towards the sensor (right).
+% # Negative is towards the scene (left).
+% #  radius	    axpos		N		    aperture
+% 67.000000	    1.500000	1.650000	25.000000
+% 0.000000	    1.500000	1.650000	25.000000
+% -67.000000	0.000000	1.000000	25.000000
 %
-% The bottom row is a surface that initiates everything and thus its offset
-% is always 0. The radius of curvature is the distance to the center of
-% sphere, which is negative in this case. Thus, the surface is like a
-% backwards 'C'.  The index of refraction is to the right of the surface
-% and for the first surface it will generally be air (1).
+% The bottom row is the rightmost surface; its z-axis position (axpos) is
+% always 0. The radius of curvature is the (directional) distance to the
+% center of sphere. Because it is negative, the center is 67 mm towards the
+% scene. Thus, the surface is curved like a backwards 'C'. The index of
+% refraction is to the right of the surface; for the first surface it will
+% generally be air (1), assuming that there is air between the lens and
+% sensor.  Of course, for the human eye, that is not the case.
 %
-% The next row up is 1.5 mm offset towards the next object. We have a 0
-% radius object, which means it's an aperture.  The material between this
-% position and the first surface is glass (N = 1.65).
+% The 2nd row has an axpos of 1.5 mm, which means it is shifted 1.5mm
+% towards the scene. Its radius is 0, which means it's an aperture. The
+% material between this position and the previous surface is glass (N =
+% 1.65).
 %
-% The third row up has a center to the right, so the shape is a 'C'.  The
-% material is still glass. %
+% The first row axpos is 1.5 mm from the previous surface. It has a center
+% to the right, so the shape is a 'C'.  The material is still glass.
 %
-% In the lens class, we don't use offsets. Instead, we store the sphere
-% centers (sCenters) and radii (units of mm).  So here we go through the
-% surfaceArray and produce the radius and offset needed for the PBRT matrix
-% from the surfaceArray object sCenters and radius.
+% The lens class stores parameters in a different format. We don't use
+% offsets; instead, we store the sphere centers (sCenters) and radii (units
+% of mm).  The fileRead and fileWrite code convert between these
+% representations.  In fileWrite the conversion is managed by the
+% lensMatrix routine.
 %
-% AL VISTASOFT, Copyright 2014
+% AL/BW VISTASOFT, Copyright 2014
+%
+% See also:
+%   lensMatrix, lensHeader
+
+% Examples:
+%{
+  % Read and write a lens all in millimeters
+  l = lens;
+  l.fileWrite('deleteme.dat','description','foobar','units','mm');
+%}
+%{
+  % Read a lens in millimeters.  Write it in meters
+  l = lens;
+  l.fileWrite('deleteme.dat','description','foobar','units','m');
+%}
 
 %%
-if notDefined('description'), description = obj.type; end
+p = inputParser;
 
-% Open the lens file for writing
+p.addRequired('fullFileName',@ischar);
+p.addParameter('description',obj.type,@ischar);
+p.addParameter('units','mm',@(x)(ismember(x,{'um','mm','m'})));
+
+p.parse(fullFileName,varargin{:});
+
+unitScale = p.Results.units;
+description = sprintf('# Description: %s\n',p.Results.description);
+description = addText(description,sprintf('# units are %s',unitScale));
+
+switch unitScale
+    case 'um'
+        % Values are in microns, so multiply by 1000 to bring to millimeters
+        unitScale = 1e3;
+    case 'mm'
+        unitScale = 1;
+    case 'm'
+        % Values are in meters, so divide by 1000 to bring to millimeters
+        unitScale = 1e-3;
+    otherwise
+        error('Unknown spatial scale');
+end
+
+%% Open the lens file for writing
 % fid = fopen(fullfile(dataPath, 'rayTrace', 'dgauss.50mm.dat'));
+if ~exist(fullFileName,'file')
+else,  fprintf('Overwriting %s\n',fullFileName)
+end
 fid = fopen(fullFileName,'w');
 
 %% Write the header
-hdr = lensHeader(obj,description);
+hdr = lensHeader(obj,description,unitScale);
 fprintf(fid,'%s',hdr);
 
 %% Write the data matrix
 d  = lensMatrix(obj);
+
+% Columns 1 2 and 4 are corrected for spatial scale
+d(:,1) = d(:,1)*unitScale;
+d(:,2) = d(:,2)*unitScale;
+d(:,4) = d(:,4)*unitScale;
+
+% Column 3 is 
 for ii=1:size(d,1)
     fprintf(fid,'%f\t%f\t%f\t%f\n', d(ii,1), d(ii, 2), d(ii,3), d(ii,4));
 end
@@ -74,81 +124,33 @@ fclose(fid);
 end
 
 
-
-
-% % i is the row where the data begin
-% 
-% % The next values are the matrix data
-% % put these data into lens object
-% radius = str2double(import{1});
-% radius = radius(dStart:length(firstColumn));
-% 
-% % Change from pbrt Scene3D format to raytrace Scene3D format
-% % In PBRT, the row has the offset from the previous surface.  In
-% % PBRT the data are read from the bottom up.  The last row has no
-% % offset.
-% % In PBRT, we trace from the sensor to the scene.
-% % In Scene3D we trace from the scene to the sensor.
-% % So, the offsets are shifted down.  This means:
-% %
-% offset = str2double(import{2});
-% offset = offset(dStart:length(firstColumn));
-% offset = [0; offset(1:(end-1))];
-% 
-% % Index of refraction in the 3rd column
-% N = str2double(import{3});
-% N = N(dStart:length(firstColumn));
-% 
-% % Diameter of the aperture (or maybe radius.  Must determine).
-% aperture = str2double(import{4});
-% aperture = aperture(dStart:length(firstColumn));
-% 
-% %modify the object and reinitialize
-% obj.elementsSet(offset, radius, aperture, N);
-% 
-% % Figure out which is the aperture/diaphragm by looking at the radius.
-% % When the spherical radius is 0, that means the object is an aperture.
-% lst = find(radius == 0);
-% if length(lst) > 1,         error('Multiple non-refractive elements %i\n',lst);
-% elseif length(lst) == 1,    obj.apertureIndex(lst);
-% else                        error('No non-refractive (aperture/diaphragm) element found');
-% end
-% 
-% 
-% end
-
-
 %% The header
-
-function hdr = lensHeader(obj, description)
+function hdr = lensHeader(obj, description, unitScale)
 
 hdr = sprintf('# Name: %s\n',obj.name);
 
-str = sprintf('# Description: %s\n',description);
+str = sprintf('%s\n',description);
 hdr = addText(hdr,str);
 
-str = sprintf('# Focal length (mm) \n');
+str = sprintf('# Focal length \n');
 hdr = addText(hdr,str);
 
-str = sprintf('%.3f\n',obj.focalLength);
+str = sprintf('%.3f\n',obj.focalLength*unitScale);
 hdr = addText(hdr,str);
 
-str = sprintf('# Each row is a surface.\n');
+str = sprintf('\n# Each row is a surface.\n');
 hdr = addText(hdr,str);
 
-str = sprintf('# The order of surfaces starts from the image and\n');
+str = sprintf('# They are ordered from the image to the sensor.\n');
 hdr = addText(hdr,str);
 
-str = sprintf('# heads to the sensor.  Zero is the position of the first lens surface.\n');
+str = sprintf('# Zero is the position of the first lens surface.\n');
 hdr = addText(hdr,str);
 
-str = sprintf('# Positive numbers are towards the lens, and negative numbers are towards\n');
+str = sprintf('# Positive is towards the sensor (right).\n# Negative is towards the scene (left).\n');
 hdr = addText(hdr,str);
 
-str = sprintf('# the image\n');
-hdr = addText(hdr,str);
-
-str = sprintf('#    radius	 axpos	N	aperture\n');
+str = sprintf('#  radius	axpos	\tN	\taperture\n');
 hdr = addText(hdr, str);
 
 end
