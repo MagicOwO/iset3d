@@ -1,40 +1,58 @@
 classdef lens <  handle
     % Create a multiple element lens object
     %
-    %   lens = lens(elOffset, elRadius, elAperture, elN, aperture, focalLength, center);
+    %   lens = lens(varargin);
+    %
+    % Inputs:
+    %   N/A
+    % Outputs:
+    %   lens object
+    % Optional key/value pairs
+    %   'filename',...,
+    %   'name', string
+    %   'type', string
+    %   'units', {'um','mm','m'}
+    %   'wave', vector
+    %   'surface array'
+    %   'aperture sample'
+    %   'aperture middle d'
+    %   'diffraction enabled'
+    %   'figure handle'
+    %   'blackbox model'
     %
     % Distance units are millimeters, unless otherwise specified.
     %
-    % We represent multi-element lenses as a sequence of spherical surfaces and
-    % circular apertures. Each surface has a curvature, position, and index of
-    % refraction (as a function of wavelength).
+    % We represent multi-element lenses as a sequence of spherical surfaces
+    % and circular apertures. Each surface has a curvature, position, and
+    % index of refraction (as a function of wavelength).
     %
     % The surface position of each surface is specified with respect to the
-    % final component of the lens. Rays travel from left (the scene) to right
-    % (the image). The zero position is the right-most spherical surface. The
-    % film (sensor) is at a positive position.
+    % final component of the lens. Rays travel from left (the scene) to
+    % right (the image). The zero position is the right-most spherical
+    % surface. The film (sensor) is at a positive position.
     %
     %     Scene ->  | Lens Surfaces ->|   Film
     %                    -            0     +
     %
-    % Apertures are circular and their center is in the (0,0) position. Hence,
-    % apertures are specified by a single parameter (diameter in mm).
+    % Apertures are circular and their center is in the (0,0) position.
+    % Hence, apertures are specified by a single parameter (diameter in
+    % mm).
     %
     % The index of refraction (n) attached to a surface defines the
     % material to the left of the surface.
     %
-    % Lens files and surface arrays are specified from the left most element
-    % (closest to the scene), to the right-most element (closest to the sensor).
-    % Hence, surface arrays are listed from negative positions to positive
-    % positions.
+    % Lens files and surface arrays are specified from the left most
+    % element (closest to the scene), to the right-most element (closest to
+    % the sensor). Hence, surface arrays are listed from negative positions
+    % to positive positions.
     %
-    % The lens object works with the 'realistic' camera class. The 'pinhole'
-    % cameras has simpler properties.
+    % The lens object works with the 'realistic' camera class. The
+    % 'pinhole' cameras has simpler properties.
     %
-    % We aim to be consistent with the PBRT lens files, and the Zemax as far
-    % possible.
+    % We aim to be consistent with the PBRT lens files, and the Zemax as
+    % far possible.
     %
-    % AL Vistasoft Copyright 2014
+    % AL/BW Vistasoft Copyright 2014
     %
     % See also:
     %    lens.draw, lens.plot, lens.set, lens.get
@@ -59,7 +77,10 @@ classdef lens <  handle
     %{
       % To convert a file in millimeters to meters
        thislens = lens('filename','2ElLens.dat','units','mm');
-       lens.fileWrite('2ElLensMeters.dat','units','m')
+       thislens.fileWrite('2ElLensMeters.dat','units','m')
+       type '2ElLens.dat'
+       type '2ElLensMeters.dat'
+       delete('2ElLensMeters.dat');
     %}
     
     properties
@@ -100,11 +121,11 @@ classdef lens <  handle
             %   'type', string
             %   'units', {'um','mm','m'}
             %   'wave', vector
-            %   'surfacearray'
-            %   'aperturesample'
-            %   'diffractionenabled'
-            %   'figurehandle'
-            %   'blackboxmodel'
+            %   'surface array'
+            %   'aperture sample'
+            %   'diffraction enabled'
+            %   'figure handle'
+            %   'blackbox model'
             %
             
             %{
@@ -114,10 +135,11 @@ classdef lens <  handle
             varargin = ieParamFormat(varargin);
             
             % Set defaults to empty.  Only fill in if not empty.
-            p.addParameter('name','',@isstring);
-            p.addParameter('type','',@isstring);
+            p.addParameter('name','',@ischar);
+            p.addParameter('type','',@ischar);
             p.addParameter('units','mm',@(x)(ismember(x,{'um','mm','m'})));
             p.addParameter('aperturesample',[],@isvector);
+            p.addParameter('aperturemiddled',[],@isscalar);
             p.addParameter('focallength',[],@isnumeric);
             p.addParameter('diffractionenabled',[],@islogical);
             p.addParameter('wave',[],@isvector)
@@ -140,6 +162,9 @@ classdef lens <  handle
             % Parameters
             if ~isempty(p.Results.aperturesample)
                 obj.apertureSample = p.Results.aperturesample;
+            end
+            if ~isempty(p.Results.aperturemiddled)
+                obj.apertureMiddleD = p.Results.aperturemiddled;
             end
             if ~isempty(p.Results.focallength)
                 obj.focalLength = p.Results.focallength;

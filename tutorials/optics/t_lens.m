@@ -12,6 +12,9 @@ lenses = thisLens.list;
 
 thisLens = lens('filename',lenses(5).name);
 thisLens.draw;
+
+%% Draw the lens focal length as a function of object distance
+
 thisLens.plot('focal distance');
 
 %% Show a point ray traced through the lens

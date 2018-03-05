@@ -1,5 +1,5 @@
 function [ieObject, result] = piRender(thisR,varargin)
-% Read a PBRT V2 scene file, run the docker cmd locally, return the ieObject.
+% Read a PBRT scene file, run the docker cmd locally, return the ieObject.
 %
 % Syntax:
 %  [oi or scene or depth map] = piRender(thisR,varargin)
@@ -17,7 +17,7 @@ function [ieObject, result] = piRender(thisR,varargin)
 %               We have multiple different metadata options. For pbrt-v2 we
 %               have depth, mesh, and material. For pbrt-v3 we have depth
 %               and coordinates at the moment. 
-%  version       - PBRT version, 2 or 3
+%  version    - PBRT version, 2 or 3
 %  
 % RETURN
 %   ieObject - an ISET scene, oi, or a depth map image
@@ -160,6 +160,11 @@ for ii = 1:length(filesToRender)
     end
     
     [~,currName,~] = fileparts(currFile);
+    
+    % Make sure renderings folder exists
+    if(~exist(fullfile(workingFolder,'renderings'),'dir'))
+        mkdir(fullfile(workingFolder,'renderings'));
+    end
     
     outFile = fullfile(workingFolder,'renderings',[currName,'.dat']);
     renderCommand = sprintf('pbrt --outfile %s %s', ...

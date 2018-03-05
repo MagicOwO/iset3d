@@ -1,4 +1,4 @@
-classdef rayC <  clonableHandleObject
+classdef rayC < matlab.mixin.Copyable
     % Create a ray object
     %
     % ray = rayC('origin', origin,'direction', direction, 'waveIndex', waveIndex, 'wave', wavelength)
@@ -195,9 +195,9 @@ classdef rayC <  clonableHandleObject
                 case 'liverays'
                     % Set the rays without a wavelength to empty  These
                     % remaining rays are the live rays.
-                    val = rayC();
-                    val.makeDeepCopy(obj);
-                    
+                    %                     val = rayC();
+                    %                     val.copy(obj);
+                    val = obj.copy;
                     liveIndices = val.get('live indices');
                     val.origin(~liveIndices, : ) = [];
                     val.direction(~liveIndices, : ) = [];
