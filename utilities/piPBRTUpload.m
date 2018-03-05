@@ -25,8 +25,23 @@ function [fnameZIP, artifact] = piPBRTUpload(zipFile,varargin)
 
 % Examples
 %{
- zipFile = fullfile(isetbioDataPath,'pbrtscenes','SlantedBar.zip')
- piPBRTUpload(
+
+ % Specify the scene name, download it, and render it
+ % By default, the download is to piRootPath/data
+ [fnameZIP, artifact] = piFetchPBRT('whiteScene');
+ [p,n,e] = fileparts(fnameZIP);
+ name = fullfile(p,n); fname = [n,'.pbrt'];
+
+ % Read the recipe from the pbrt scene file, 
+ % which is contained inside a directory of the same name
+ thisR = piRead(fullfile(dname,fname));
+
+ % Render the output to the piRootPath/local output directory
+ thisR.outputFile = fullfile(piRootPath,'local',fname); 
+ scene = piRender(thisR);
+
+ % View it
+ ieAddObject(scene); sceneWindow;
 %}
 %{
  

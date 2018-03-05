@@ -37,6 +37,22 @@ function [fnameZIP, artifact] = piPBRTFetch(aName,varargin)
  [p,n,e] = fileparts(fnameZIP);
  dname = fullfile(p,n); fname = [n,'.pbrt'];
  thisR = piRead(fullfile(dname,fname));
+
+ % Render the output to the piRootPath/local output directory
+ thisR.outputFile = fullfile(piRootPath,'local',fname); 
+ scene = piRender(thisR);
+
+ % View it
+ ieAddObject(scene); sceneWindow;
+%}
+%{
+ % By default, this places the data in piRootPath/data.  
+ % You could set the 'deletezip', true parameter.
+ [fnameZIP, artifact] = piPBRTFetch('sanmiguel');
+
+ % Assumes the scene pbrt file is in piRootPath/data
+ % And places the output in piRootPath/local
+ s_sanmiguel;
 %}
 
 %% Parse inputs

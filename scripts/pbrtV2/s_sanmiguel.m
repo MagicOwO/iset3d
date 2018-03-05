@@ -64,6 +64,6 @@ scene = piRender(thisR);
 % depthMap = piRender(thisR,'renderType','depth')
 
 % Show it in ISET
-vcAddObject(scene); sceneWindow; sceneSet(scene,'gamma',0.5);
+ieAddObject(scene); sceneWindow; sceneSet(scene,'gamma',0.5);
 
 %%

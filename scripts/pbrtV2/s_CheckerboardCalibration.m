@@ -139,7 +139,7 @@ for ii = 1:numImages
     if(~gcloudFlag)
         % Write and render
         [oi,result] = piRender(thisR);
-        vcAddObject(oi);
+        ieAddObject(oi);
         oiWindow;
     else
         gCloud.upload(recipe);

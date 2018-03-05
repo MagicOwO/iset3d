@@ -50,8 +50,7 @@ piWrite(thisR);
 
 scene = piRender(thisR);
 scene = oiSet(scene,'name','Radiance_and_Depth');
-vcAddObject(scene); sceneWindow;   
-sceneSet(scene,'gamma',0.5);
+ieAddObject(scene); sceneWindow;   
 
 %% Render an image with each pixel labeled by material type.
 
@@ -109,8 +108,9 @@ colormap(mp); title('Mesh (re-mapped)');
 % If you are looping, you may only want the depth once. This is how you get
 % just the radiance.
 scene = piRender(thisR,'renderType','radiance');
-scene = oiSet(scene,'name','Radiance only');
-vcAddObject(scene); sceneWindow; 
+
+scene = oiSet(scene,'name','RadianceOnly');
+ieAddObject(scene); sceneWindow; 
 %}
 
 %%
